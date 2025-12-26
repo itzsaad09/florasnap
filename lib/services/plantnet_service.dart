@@ -4,7 +4,7 @@ import '../data/models/plant_model.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class PlantNetService {
-  static String get apiKey => dotenv.env['PLANT_NET_API_KEY'] ?? "";
+  static String get apiKey => dotenv.env['PLANTNET_API_KEY'] ?? "";
 
   static Future<Plant?> identifyPlant(List<int> imageBytes) async {
     if (apiKey.isEmpty || apiKey == "YOUR_PLANTNET_API_KEY_HERE") {

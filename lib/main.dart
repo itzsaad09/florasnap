@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'presentation/views/home_screen.dart';
 import 'presentation/views/result_screen.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized(); // Required
+  await dotenv.load(fileName: ".env"); // Must match your file name
   runApp(const FloraSnap());
 }
 
