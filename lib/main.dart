@@ -5,8 +5,8 @@ import 'presentation/views/result_screen.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized(); // Required
-  await dotenv.load(fileName: ".env"); // Must match your file name
+  WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
   runApp(const FloraSnap());
 }
 

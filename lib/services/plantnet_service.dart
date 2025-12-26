@@ -4,7 +4,7 @@ import '../data/models/plant_model.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class PlantNetService {
-  static String get apiKey => dotenv.env['PLANTNET_API_KEY'] ?? "";
+  static String get apiKey => dotenv.env['PLANT_NET_API_KEY'] ?? "YOUR_PLANTNET_API_KEY_HERE";
 
   static Future<Plant?> identifyPlant(List<int> imageBytes) async {
     if (apiKey.isEmpty || apiKey == "YOUR_PLANTNET_API_KEY_HERE") {
@@ -22,7 +22,7 @@ class PlantNetService {
       http.MultipartFile.fromBytes('images', imageBytes, filename: 'plant.jpg'),
     );
 
-    request.fields['organs'] = 'auto';
+    request.fields['organs'] = jsonEncode(['auto']);
 
     try {
       final response = await request.send();
@@ -40,14 +40,11 @@ class PlantNetService {
         return Plant(
           name: _extractCommonName(species),
           scientificName: species['scientificNameWithoutAuthor'] ?? "Unknown",
-          family:
-              species['family']?['scientificNameWithoutAuthor'] ?? "Unknown",
-
+          family: species['family']?['scientificNameWithoutAuthor'] ?? "Unknown",
           confidence: (best['score'] as num).toDouble(),
           description: _buildDescription(best),
           careTips: _buildGenericCareTips(),
-          toxicity:
-              "Not specified (check reliable sources like ASPCA for pets)",
+          toxicity: "Toxicity not specified in results – check ASPCA or similar for pets",
           origin: _extractOrigin(best),
           isEdible: _inferEdibility(best),
         );
@@ -73,11 +70,12 @@ class PlantNetService {
     final species = best['species'];
     final commonNames = species['commonNames'] as List<dynamic>? ?? [];
     final sciName = species['scientificNameWithoutAuthor'] ?? "this plant";
+    final confidencePercent = (best['score'] as num).toDouble() * 100;
 
     if (commonNames.isNotEmpty) {
-      return "The $sciName, commonly known as ${commonNames[0]}, is a species identified with ${(best['score'] * 100).toStringAsFixed(1)}% confidence.";
+      return "The $sciName, commonly known as ${commonNames[0]}, has been identified with ${confidencePercent.toStringAsFixed(1)}% confidence.";
     }
-    return "$sciName has been identified using Pl@ntNet's advanced recognition system.";
+    return "$sciName has been identified with ${confidencePercent.toStringAsFixed(1)}% confidence using Pl@ntNet.";
   }
 
   static List<String> _buildGenericCareTips() {
@@ -90,32 +88,19 @@ class PlantNetService {
   }
 
   static String _extractOrigin(Map<String, dynamic> best) {
-    return "Check regional flora databases for specific distribution.";
+    return "Global distribution varies – consult regional sources.";
   }
 
   static bool _inferEdibility(Map<String, dynamic> best) {
-    final commonNames =
-        (best['species']?['commonNames'] as List<dynamic>? ?? [])
-            .map((e) => e.toString().toLowerCase())
-            .toList();
+    final commonNames = (best['species']?['commonNames'] as List<dynamic>? ?? [])
+        .map((e) => e.toString().toLowerCase())
+        .toList();
 
     const knownEdibleHints = [
-      "basil",
-      "mint",
-      "thyme",
-      "rosemary",
-      "parsley",
-      "oregano",
-      "tomato",
-      "lemon",
-      "lime",
-      "strawberry",
-      "apple",
-      "cherry",
+      "basil", "mint", "thyme", "rosemary", "parsley", "oregano",
+      "tomato", "lemon", "lime", "strawberry", "apple", "cherry",
     ];
 
-    return commonNames.any(
-      (name) => knownEdibleHints.any((hint) => name.contains(hint)),
-    );
+    return commonNames.any((name) => knownEdibleHints.any((hint) => name.contains(hint)));
   }
 }

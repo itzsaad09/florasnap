@@ -1,4 +1,3 @@
-import 'package:florasnap/services/plantnet_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -6,10 +5,9 @@ import '../../data/models/plant_model.dart';
 import '../../services/plantnet_service.dart';
 
 class PlantController extends GetxController {
-  var isLoading = false.obs;
-  var plant = Rxn<Plant>();
-  var imageFile = Rxn<XFile>();
-
+  final isLoading = false.obs;
+  final plant = Rxn<Plant>();
+  final imageFile = Rxn<XFile>();
   final picker = ImagePicker();
 
   void takePhoto() async {
@@ -17,7 +15,6 @@ class PlantController extends GetxController {
       source: ImageSource.camera,
       imageQuality: 85,
     );
-
     if (pickedFile != null) {
       imageFile.value = pickedFile;
       identifyPlant(pickedFile);
@@ -29,7 +26,6 @@ class PlantController extends GetxController {
       source: ImageSource.gallery,
       imageQuality: 85,
     );
-
     if (pickedFile != null) {
       imageFile.value = pickedFile;
       identifyPlant(pickedFile);
@@ -38,35 +34,32 @@ class PlantController extends GetxController {
 
   void identifyPlant(XFile file) async {
     isLoading(true);
-
     try {
       final bytes = await file.readAsBytes();
       final result = await PlantNetService.identifyPlant(bytes);
 
       if (result != null) {
         plant.value = result;
+
         Get.toNamed('/result');
       } else {
-        // Show PlantNet's message (like "server busy" or "timeout")
         Get.snackbar(
-          "Try Again",
-          "Could not identify the plant. Please try again later.",
+          "No Match Found",
+          "Pl@ntNet couldn't identify this image. Try a clearer photo of the leaves.",
           backgroundColor: Colors.orange[100],
           colorText: Colors.orange[900],
-          duration: const Duration(seconds: 8),
           snackPosition: SnackPosition.BOTTOM,
         );
       }
     } catch (e) {
-      // Only show "No Internet" for real connection loss
       Get.snackbar(
-        "No Internet",
-        "Check your connection and try again",
+        "Error",
+        "An unexpected error occurred: $e",
         backgroundColor: Colors.red[100],
         colorText: Colors.red[900],
       );
+    } finally {
+      isLoading(false);
     }
-
-    isLoading(false);
   }
 }
