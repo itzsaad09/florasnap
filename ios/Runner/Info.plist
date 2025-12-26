@@ -44,10 +44,6 @@
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
-	<key>NSCameraUsageDescription</key>
-	<string>We need access to your camera to identify plants.</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>We need access to your photos to identify plants.</string>
 	<true/>
 </dict>
 </plist>
